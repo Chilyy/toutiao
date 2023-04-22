@@ -4,20 +4,35 @@
     <van-nav-bar class="page-nav-bar" title="登录"/>
     <!-- /导航栏 -->
     <!-- 登录模块 -->
-    <van-form @submit="onSubmit">
+    <van-form @submit="onSubmit" ref="getmobilecode">
     <van-field
-      name="用户名"
+      v-model="user.mobile"
+      name="mobile"
       placeholder="请输入手机号"
+      :rules="userinfo.mobile"
+      type="number"
+      maxlength="11"
       ><i class="toutiao toutiao-shouji" slot="left-icon"></i>
     </van-field>
     <van-field
-      type="password"
-      name="验证码"
+      v-model="user.code"
+      name="code"
       placeholder="请输入验证码"
+      :rules="userinfo.code"
+      type="number"
+      maxlength="6"
       ><i class="toutiao toutiao-yanzhengma" slot="left-icon"></i>
+
       <!-- 验证码按钮框 -->
       <template #button>
-         <van-button class=" btn-message" round size="small" type="dafault">发送验证码</van-button>
+        <!-- 倒计时 time 是时间 毫秒 后面的s是样式s-->
+         <van-count-down :time="1000 * 10" format="ss s" v-if="isCountShow" @finish="isCountShow = false"/>
+         <!-- /倒计时 -->
+         <van-button class=" btn-message" round size="small" type="dafault"
+         native-type="button"
+         @click="getcode"
+         v-else
+         >发送验证码</van-button>
       </template>
       <!-- /验证码按钮框 -->
     </van-field>
@@ -31,9 +46,71 @@
 </template>
 
 <script>
+// 登录请求的方法
+import { login, codemes } from '@/api/user'
 export default {
-  name: 'MyLogin'
+  name: 'MyLogin',
+  data () {
+    return {
+      // 手机输入框里的数据
+      user: {
+        mobile: '',
+        code: ''
+      },
+      // 判断用户输入
+      userinfo: {
+        mobile:
+          [{ required: true, message: '手机号为空' }, { pattern: /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[1589]))\d{8}$/, message: '请输入正确的手机号码' }],
+        code:
+          [{ required: true, message: '验证码为空' }, { pattern: /^\d{6}$/, message: '请输入正确的验证码' }]
+
+      },
+      // 点击验证码 是否展示倒计时
+      isCountShow: ''
+    }
+  },
+  methods: {
+    async onSubmit () {
+      const user = this.user
+      // 登录轻提示
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: false, // 禁用背景点击
+        duration: 0 // 组件展示时间 如果为0 一直展示
+      })
+      try {
+        const { data: res } = await login(user)
+        console.log('登录成功', res)
+        this.$toast.success('登录成功')
+      } catch (err) {
+        if (err.response.status === 400) {
+          console.log(user)
+          this.$toast.fail('验证码错误')
+        } else {
+          console.log('登录失败，请再试一次')
+          this.$toast.fail('登录失败，请再试一次')
+        }
+      }
+    },
+    async getcode () {
+      try {
+        await this.$refs.getmobilecode.validate('mobile')
+      } catch (err) {
+        return console.log('错误', err)
+      }
+      this.isCountShow = true
+      try {
+        await codemes(this.user.mobile)
+      } catch (err) {
+        if (err.response.status === 404) {
+          this.isCountShow = false
+          this.$toast('没钱发短信，请使用万能验证码246810')
+        }
+      }
+    }
+  }
 }
+
 </script>
 
 <style lang="less" scoped>

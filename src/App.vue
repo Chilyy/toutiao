@@ -7,11 +7,7 @@
 <script>
 export default {
   name: 'App',
-  methods: {
-    onSubmit (values) {
-      console.log('submit', values)
-    }
-  },
+
   data () {
     return {
 
