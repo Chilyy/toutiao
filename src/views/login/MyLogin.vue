@@ -54,8 +54,8 @@ export default {
     return {
       // 手机输入框里的数据
       user: {
-        mobile: '',
-        code: ''
+        mobile: '13911111111',
+        code: '246810'
       },
       // 判断用户输入
       userinfo: {
@@ -82,6 +82,7 @@ export default {
         const { data: res } = await login(user)
         console.log('登录成功', res)
         this.$toast.success('登录成功')
+        this.$store.commit('setUser', res.data)
       } catch (err) {
         if (err.response.status === 400) {
           console.log(user)
