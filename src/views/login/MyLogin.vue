@@ -47,7 +47,7 @@
 
 <script>
 // 登录请求的方法
-import { login, codemes } from '@/api/user'
+import { login, codemes } from '@/API/user'
 export default {
   name: 'MyLogin',
   data () {
@@ -86,7 +86,7 @@ export default {
       } catch (err) {
         if (err.response.status === 400) {
           console.log(user)
-          this.$toast.fail('验证码错误')
+          this.$toast.fail('手机号或验证码错误')
         } else {
           console.log('登录失败，请再试一次')
           this.$toast.fail('登录失败，请再试一次')
@@ -102,10 +102,13 @@ export default {
       this.isCountShow = true
       try {
         await codemes(this.user.mobile)
+        this.$toast('嘿嘿,没钱发短信，请使用万能验证码246810')
       } catch (err) {
-        if (err.response.status === 404) {
+        if (err.response.status === 429) {
           this.isCountShow = false
-          this.$toast('没钱发短信，请使用万能验证码246810')
+          this.$toast('请勿频繁点击，我的忍耐只有60s')
+        } else {
+          this.$toast('手机号码错误')
         }
       }
     }

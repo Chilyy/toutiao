@@ -10,6 +10,6 @@ export const login = function (data) {
 export const codemes = mobile => {
   return request({
     method: 'GET',
-    url: `/app/v1_0/sms/codes/${mobile}`
+    url: `/v1_0/sms/codes/${mobile}`
   })
 }
