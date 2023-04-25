@@ -1,7 +1,7 @@
 <template>
   <div class="MyLogin-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar" title="登录"/>
+    <van-nav-bar class="page-nav-bar" title="登录" left-text="返回" left-arrow @click-left="onClickLeft"/>
     <!-- /导航栏 -->
     <!-- 登录模块 -->
     <van-form @submit="onSubmit" ref="getmobilecode">
@@ -54,7 +54,7 @@ export default {
     return {
       // 手机输入框里的数据
       user: {
-        mobile: '13911111111',
+        mobile: '19876781243',
         code: '246810'
       },
       // 判断用户输入
@@ -81,7 +81,7 @@ export default {
       try {
         const { data: res } = await login(user)
         console.log('登录成功', res)
-        this.$router.push('/')
+        this.$router.push('/mine')
         this.$toast.success('登录成功')
         this.$store.commit('setUser', res.data)
       } catch (err) {
@@ -112,6 +112,9 @@ export default {
           this.$toast('手机号码错误')
         }
       }
+    },
+    onClickLeft () {
+      this.$router.back()
     }
   }
 }
@@ -119,6 +122,12 @@ export default {
 </script>
 
 <style lang="less" scoped>
+//  /deep/ .van-icon-arrow-left {
+//       color: white !important;
+//     }
+  // /deep/  .van-nav-bar__text {
+  //   color:white
+  // }
 .MyLogin-container {
   // 图标大小
   .toutiao {
@@ -139,7 +148,7 @@ export default {
   .login-input {
     padding: 53px 33px;
     .input-login {
-      background-color: #66B1FF;
+      background-color: #EC4141;
       border: none;
     }
   }
