@@ -16,7 +16,7 @@ export const getItem = key => {
   // 为什么不用if else 因为if判断json格式不好判断
   // try方式 如果data真的是json格式 就执行成功了 如果不是就返回原数据
   try {
-    return JSON.parse('data')
+    return JSON.parse(data)
   } catch (err) {
     return data
   }

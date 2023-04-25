@@ -18,11 +18,12 @@
             round
             width="90px"
             height="90px"
-            :src="require('@/assets/微信图片_20230423201325.jpg')"
+            :src="$store.state.user.mobile === '19876781243' ? require('@/assets/微信图片_20230423201325.jpg') : Uinfo.photo"
             fit="cover"
 
           />
-          <span class="img-title">财贸腿最短</span>
+          <span class="img-title">{{$store.state.user.mobile === '19876781243' ? '财贸腿最短' : Uinfo.name}}</span>
+          <van-tag   class="tag" v-if="$store.state.user.mobile === '19876781243'">财贸认证:黄金右脚</van-tag>
         </div>
         <div class="right">
           <van-button squired type="info"><i slot="icon" class="toutiao toutiao-yuedu"></i>今日已阅读<br>5分钟</van-button>
@@ -30,19 +31,19 @@
       </div>
       <div class="data-stats">
         <div class="data-count">
-          <div class="count">999+</div>
+          <div class="count">{{$store.state.user.mobile === '19876781243' ? '999+' : Uinfo.art_count}}</div>
           <div class="hanzi">发布</div>
         </div>
         <div class="data-count">
-          <div class="count">999+</div>
+          <div class="count">{{$store.state.user.mobile === '19876781243' ? '999+' : Uinfo.follow_count}}</div>
           <div class="hanzi">头条</div>
         </div>
         <div class="data-count">
-          <div class="count">999+</div>
+          <div class="count">{{$store.state.user.mobile === '19876781243' ? '999+' : Uinfo.fans_count}}</div>
           <div class="hanzi">粉丝</div>
         </div>
         <div class="data-count">
-          <div class="count">999+</div>
+          <div class="count">{{$store.state.user.mobile === '19876781243' ? '999+' : Uinfo.like_count}}</div>
           <div class="hanzi">获赞</div>
         </div>
 
@@ -72,9 +73,18 @@
 </template>
 
 <script>
+import { userInfo } from '@/API/user'
 
+// import removeItem from '@/utils/storage'
 export default {
   name: 'MyMine',
+  data () {
+    return {
+      // 登录的用户信息
+      Uinfo: {}
+
+    }
+  },
   methods: {
     djexit () {
       // 这里的dialog函数要用this.$dialog调用
@@ -84,15 +94,32 @@ export default {
       })
         .then(() => {
           // on confirm
-          console.log('退出成功')
+
+          // 改成null 表示把本地存储的数据变成无效
           this.$store.commit('setUser', null)
+          // removeItem('USER-KEY')
         })
         .catch(() => {
           // on cancel
 
         })
+    },
+    async getUserInfo () {
+      try {
+        const { data: res } = await userInfo()
+        this.Uinfo = res.data
+      } catch (err) {
+
+      }
+    }
+  },
+  created () {
+    // 如果用户没登录就不发请求
+    if (this.$store.state) {
+      this.getUserInfo()
     }
   }
+
 }
 </script>
 
@@ -150,6 +177,15 @@ export default {
       color: white;
       margin-left: 23px;
     }
+    // 财贸认证小标签
+     .tag {
+      position: absolute;
+      top: 110px;
+      left: 205px;
+      color: gold;
+      background-color: black;
+     }
+
     }
     .right {
       position: absolute;

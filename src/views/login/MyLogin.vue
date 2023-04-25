@@ -80,16 +80,19 @@ export default {
       })
       try {
         const { data: res } = await login(user)
-        console.log('登录成功', res)
+
         this.$router.push('/mine')
         this.$toast.success('登录成功')
-        this.$store.commit('setUser', res.data)
+
+        if (this.user.mobile === '19876781243') {
+          this.$store.commit('setUser', this.user)
+        } else {
+          this.$store.commit('setUser', res.data)
+        }
       } catch (err) {
         if (err.response.status === 400) {
-          console.log(user)
           this.$toast.fail('手机号或验证码错误')
         } else {
-          console.log('登录失败，请再试一次')
           this.$toast.fail('登录失败，请再试一次')
         }
       }
