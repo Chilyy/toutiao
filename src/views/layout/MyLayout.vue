@@ -4,7 +4,7 @@
     <router-view></router-view>
     <!-- /子路由出口 -->
     <!-- 底部tabbar -->
-    <van-tabbar  class="style-container" route active-color="#ee0a24">
+    <van-tabbar  class="style-container" route active-color="#ee0a24" placeholder>
       <van-tabbar-item to="/home">
         <i slot="icon" class="toutiao toutiao-shouye" > </i>
         <span class="text">首页</span>
