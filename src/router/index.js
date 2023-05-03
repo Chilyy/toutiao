@@ -6,6 +6,7 @@ import MyHome from '@/views/home/MyHome' // 首页
 import MyAnswer from '@/views/answer/MyAnswer' // 问答
 import MyVideo from '@/views/video/MyVideo' // 视频
 import MyMine from '@/views/mine/MyMine' // 我的
+import MySearch from '@/views/search/MySearch' // 搜索
 Vue.use(VueRouter)
 
 // 路由表
@@ -22,7 +23,8 @@ const routes = [
       { path: 'mine', component: MyMine }
     ]
   },
-  { path: '/login', component: MyLogin }
+  { path: '/login', component: MyLogin },
+  { path: '/search', component: MySearch }
 ]
 
 const router = new VueRouter({

@@ -28,3 +28,21 @@ export const userInfo = () => {
 
   })
 }
+
+// 把登录状态的 频道保存下来
+export const loginUserChannel = channel => {
+  return request({
+    method: 'PATCH',
+    url: '/v1_0/user/channels',
+    data: {
+      channels: [channel]
+    }
+  })
+}
+// 把登录状态的 删除指定id的频道
+export const deleteLoginUserChannel = id => {
+  return request({
+    method: 'DELETE',
+    url: `/v1_0/user/channels/${id}`
+  })
+}

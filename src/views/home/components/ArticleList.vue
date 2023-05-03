@@ -54,7 +54,9 @@ export default {
         const { data: res } = await articleLists({
           channel_id: this.channeled.id,
           timestamp: this.newtime || Date.now() // timestamp表示的是页码 返回的数据里 有新的时间戳就是前一页的时间戳
+
         })
+
         // 第二步 把获取的文章数据存到data中
 
         this.list = [...this.list, ...res.data.results]

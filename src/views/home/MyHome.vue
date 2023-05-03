@@ -9,7 +9,8 @@
       size="small"
       round
       icon="search"
-      color="#E33E3E"
+      color="#CC3838"
+      to="/search"
       >
       搜索
       </van-button>
@@ -41,7 +42,12 @@
       position="bottom"
       close-icon-position="top-left"
       :style="{ height: '100%' }"
-    ><pop-up/></van-popup>
+
+    ><pop-up
+    :channels="channels"
+    :active="active"
+    @getchannel="getchanneldata"
+    ></pop-up></van-popup>
     <!-- /汉堡按钮的弹出层 -->
   </div>
 </template>
@@ -50,6 +56,8 @@
 import { channelList } from '@/API/channel'
 import articleList from './components/ArticleList.vue'
 import PopUp from './components/PopUp.vue'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 
 export default {
   name: 'MyHome',
@@ -67,15 +75,32 @@ export default {
   methods: {
     // 获取频道列表
     async getChannelList () {
-      const { data: res } = await channelList()
-      this.channels = res.data.channels
+      if (this.user) {
+        const { data: res } = await channelList()
+        this.channels = res.data.channels
+      } else {
+        const localchannel = getItem('NO-LOGIN')
+        if (localchannel) {
+          this.channels = localchannel
+        } else {
+          const { data: res } = await channelList()
+          this.channels = res.data.channels
+        }
+      }
     },
     getpopup () {
       this.show = true
+    },
+    getchanneldata (e, isshow = true) {
+      this.active = e
+      this.show = isshow
     }
   },
   created () {
     this.getChannelList()
+  },
+  computed: {
+    ...mapState(['user'])
   }
 
 }
@@ -142,15 +167,15 @@ export default {
         font-size: 33px;
       }
       // 汉堡按钮---左侧灰色渐变边框
-      &:before {
-        content: "";
-        width: 1px;
-        background-image: url(~@/assets/gradient-gray-line.png);
-        height: 100%;
-        position: absolute;
-        left: 0px;
-        background-size: contain;
-      }
+      // &:before {
+      //   content: "";
+      //   width: 1px;
+      //   background-image: url(~@/assets/gradient-gray-line.png);
+      //   height: 100%;
+      //   position: absolute;
+      //   left: 0px;
+      //   background-size: contain;
+      // }
 
     }
   }
