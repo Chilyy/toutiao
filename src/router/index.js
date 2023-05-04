@@ -7,6 +7,7 @@ import MyAnswer from '@/views/answer/MyAnswer' // 问答
 import MyVideo from '@/views/video/MyVideo' // 视频
 import MyMine from '@/views/mine/MyMine' // 我的
 import MySearch from '@/views/search/MySearch' // 搜索
+import MyArticleDetail from '@/views/article/MyArticleDetail' // 文章详情页
 Vue.use(VueRouter)
 
 // 路由表
@@ -24,7 +25,8 @@ const routes = [
     ]
   },
   { path: '/login', component: MyLogin },
-  { path: '/search', component: MySearch }
+  { path: '/search', component: MySearch },
+  { path: '/article/:articleId', component: MyArticleDetail }
 ]
 
 const router = new VueRouter({

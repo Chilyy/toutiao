@@ -1,7 +1,7 @@
 <template>
   <div class="SearchSuggestion-container">
     <van-cell
-
+    @click="$emit('search', item)"
     icon="search"
     v-for="(item,index) in suggestionList"
     :key="index"
@@ -46,10 +46,14 @@ export default {
       this.suggestionList = res.data.options
     },
     highligh (e) {
+      // e是搜索的全部结果
       // 1.改变搜索的字体颜色
-      console.log(e)
+      if (!e) return
       const fontcolor = `<span class="active">${this.searchText}</span>`
       // 2.要替换的文本(正则表达式)
+      // 变量reg 根据变量动态绑定正则表达式，因为直接输入正则表达式不是动态变化的
+      // replace方法不会修改原数据，返回新数据
+
       const reg = new RegExp(this.searchText, 'gi')
       return e.replace(reg, fontcolor)
     }
@@ -59,6 +63,7 @@ export default {
 
 <style scoped lang="less">
  .SearchSuggestion-container {
+  // 联想结果的高亮字的颜色
   /deep/ span.active {
     color: #EC4141;
   }

@@ -1,5 +1,8 @@
 <template >
-  <van-cell class="MyArticle-container">
+  <van-cell
+  class="MyArticle-container"
+  :to="`/article/${articleList.art_id}`"
+  >
     <!-- 文章标题插槽 -->
     <div slot="title" class="title van-multi-ellipsis--l2"> {{ articleList.title}}</div>
     <!-- /文章标题插槽 -->
