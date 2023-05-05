@@ -1,46 +1,54 @@
 <template>
   <div class="MyArticleDetail-container">
     <van-nav-bar class="page-nav-bar" title="文章详情" left-text="返回" left-arrow @click-left="onClickLeft"/>
-    <van-loading color="#EC4141" vertical>加载中...</van-loading>
-    <h1 class="big_title">小技巧:使用Array.reduce创建Promise回调链</h1>
+    <div v-if="isloding"><van-loading color="#EC4141" vertical >加载中...</van-loading></div>
+
     <!-- 标题下的内容 -->
-    <div class="title-bottom">
-       <div class="head_portrait">
-        <van-image
-          class="photo"
-          round
+    <div class="article" v-else-if="articleDetailList.title">
+      <h1 class="big_title">{{articleDetailList.title}}</h1>
+       <div class="title-bottom">
+         <div class="head_portrait">
+          <van-image
+            class="photo"
+            round
+            fit="cover"
+            :src="articleDetailList.aut_photo"
+          ></van-image>
+          <div class="name-time">
+            <span class="user-name">{{articleDetailList.aut_name}}</span>
+            <span class="user-time">{{ articleDetailList.pubdate | relativeTime }}</span>
+          </div>
 
-          src="https://img01.yzcdn.cn/vant/cat.jpeg"
-        ></van-image>
-        <div class="name-time">
-          <span class="user-name">天涯小行客</span>
-          <span class="user-time">4小时前</span>
-        </div>
-
+         </div>
+         <van-button round type="info" size="small" class="button-attention">
+            <van-icon slot="icon" name="plus" class="plus-icon"></van-icon>
+            <span class="text">关注</span>
+          </van-button>
        </div>
-       <van-button round type="info" size="small" class="button-attention">
-          <van-icon slot="icon" name="plus" class="plus-icon"></van-icon>
-          <span class="text">关注</span>
-        </van-button>
-
+       <div>
+        <div class="article-content markdown-body" v-html="articleDetailList.content"></div>
+        <van-divider>正文结束</van-divider>
+       </div>
     </div>
     <!-- /标题下的内容 -->
     <!-- 文章内容 -->
-    <div class="article-content">这是文章内容</div>
-    <van-divider>正文结束</van-divider>
+
     <!-- /文章内容 -->
      <!-- 加载失败：404 -->
-     <div class="error-wrap">
+     <div class="error-wrap" v-else-if="errStatus === 404">
         <van-icon name="failure" />
         <p class="text">该资源不存在或已删除！</p>
       </div>
       <!-- /加载失败：404 -->
 
       <!-- 加载失败：其它未知错误（例如网络原因或服务端异常） -->
-      <div class="error-wrap">
+      <div class="error-wrap" v-else>
         <van-icon name="failure" />
         <p class="text">内容加载失败！</p>
-        <van-button class="retry-btn">点击重试</van-button>
+        <van-button
+        class="retry-btn"
+        @click="aricleDetail"
+        >点击重试</van-button>
       </div>
       <!-- /加载失败：其它未知错误（例如网络原因或服务端异常） -->
       <!-- 底部区域 -->
@@ -50,10 +58,11 @@
         type="default"
         round
         size="small"
+
       >写评论</van-button>
       <van-icon
         name="comment-o"
-        info="123"
+        :badge="123"
         color="#777"
       />
       <van-icon
@@ -83,21 +92,35 @@ export default {
   },
   data () {
     return {
-      articleDetailList: {}
+      articleDetailList: {},
+      isloding: true, // 控制刷新状态
+      errStatus: 0 // 控制失败状态
     }
   },
 
   methods: {
+
     onClickLeft () {
+      // 点击返回 返回来的页面
       this.$router.back()
     },
     async aricleDetail () {
+      // 点击重试 重新调用该方法 并执行转圈圈
+      this.isloding = true
       try {
         const { data: res } = await getArticleDetail(this.$props.articleId)
+        // 模拟除了404的失败
+        // if (Math.random() > 0.5) {
+        //   JSON.parse('dmfosdmfdf')
+        // }
         this.articleDetailList = res.data
       } catch (err) {
-
+        console.log(err)
+        if (err.response && err.response.status === 404) {
+          this.errStatus = 404
+        }
       }
+      this.isloding = false
     }
   },
   created () {
@@ -107,6 +130,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import "./github-markdown.css";
 .MyArticleDetail-container{
   // 标题
   .big_title{
@@ -114,7 +138,8 @@ export default {
   color: #333333;
   padding-left: 30px;
 }
-.title-bottom {
+.article {
+  .title-bottom {
   display: flex;
   justify-content:space-between;
   align-items: center;
@@ -124,7 +149,7 @@ export default {
   display: flex;
   .photo {
     width: 140px;
-    height: 140px
+    height: 140px;
   }
   // 文章作者 和时间
   .name-time {
@@ -143,6 +168,7 @@ export default {
 
   }
  }
+ // 关注按钮
  .button-attention {
   margin-right: 39px;
   background-color: #EC4141 ;
@@ -157,12 +183,17 @@ export default {
     }
   }
 }
+ // 文章内容
  .article-content {
       padding: 55px 32px;
+
       /deep/ p {
         text-align: justify;
+
       }
-}
+
+}}
+// 404 状态
 .loading-wrap {
     padding: 200px 32px;
     display: flex;
@@ -170,7 +201,7 @@ export default {
     justify-content: center;
     background-color: #fff;
   }
-
+// 除了404 的其他错误
   .error-wrap {
     padding: 200px 32px;
     display: flex;
@@ -196,7 +227,7 @@ export default {
       color: #666666;
     }
   }
-
+// 评论
   .article-bottom {
     position: fixed;
     left: 0;
