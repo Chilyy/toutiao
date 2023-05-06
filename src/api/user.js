@@ -46,3 +46,20 @@ export const deleteLoginUserChannel = id => {
     url: `/v1_0/user/channels/${id}`
   })
 }
+// 关注用户
+export const addFollow = target => {
+  return request({
+    method: 'POST',
+    url: '/v1_0/user/followings',
+    data: {
+      target
+    }
+  })
+}
+// 取消关注用户
+export const cancelFollow = target => {
+  return request({
+    method: 'DELETE',
+    url: `/v1_0/user/followings/${target}`
+  })
+}

@@ -20,13 +20,31 @@
           </div>
 
          </div>
-         <van-button round type="info" size="small" class="button-attention">
+          <van-button
+          v-if="articleDetailList.is_followed"
+            class="follow-btn"
+            round
+            size="small"
+            @click="isFollow"
+            :loading="followLoading"
+          >已关注</van-button>
+         <van-button
+         v-else
+         round type="info"
+         size="small"
+         @click="isFollow"
+         :loading="followLoading"
+         class="button-attention">
             <van-icon slot="icon" name="plus" class="plus-icon"></van-icon>
             <span class="text">关注</span>
           </van-button>
        </div>
        <div>
-        <div class="article-content markdown-body" v-html="articleDetailList.content"></div>
+        <div
+        class="article-content markdown-body"
+        v-html="articleDetailList.content"
+        ref="article-content"
+        ></div>
         <van-divider>正文结束</van-divider>
        </div>
     </div>
@@ -81,7 +99,9 @@
 </template>
 
 <script>
+import { ImagePreview } from 'vant' // 导入点击文章图片滑动模块
 import { getArticleDetail } from '@/API/article'
+import { cancelFollow, addFollow } from '@/API/user'
 export default {
   name: 'MyArticleDetail',
   props: {
@@ -94,7 +114,8 @@ export default {
     return {
       articleDetailList: {},
       isloding: true, // 控制刷新状态
-      errStatus: 0 // 控制失败状态
+      errStatus: 0, // 控制失败状态
+      followLoading: false // 控制点击关注的 loading状态
     }
   },
 
@@ -114,6 +135,9 @@ export default {
         //   JSON.parse('dmfosdmfdf')
         // }
         this.articleDetailList = res.data
+        setTimeout(() => {
+          this.getImagePreView()
+        }, 0)
       } catch (err) {
         console.log(err)
         if (err.response && err.response.status === 404) {
@@ -121,6 +145,40 @@ export default {
         }
       }
       this.isloding = false
+    },
+    getImagePreView () {
+      const includeImg = this.$refs['article-content']
+      const imgs = includeImg.querySelectorAll('img')
+      const images = []
+      imgs.forEach((img, index) => {
+        images.push(img.src)
+        img.onclick = () => {
+          ImagePreview({
+            images,
+            startPosition: index
+          })
+        }
+      })
+    },
+    async isFollow () {
+      this.followLoading = true
+      try {
+        if (this.articleDetailList.is_followed) {
+          // 如果是已关注，点击就是取消关注
+          await cancelFollow(this.articleDetailList.aut_id)
+        } else {
+          // 如果是未关注，点击添加关注
+          await addFollow(this.articleDetailList.aut_id)
+        }
+        this.articleDetailList.is_followed = !this.articleDetailList.is_followed
+      } catch (err) {
+        let message = '操作失败，请重试'
+        if (err.response && err.response.status === 400) {
+          message = '不能关注自己'
+        }
+        this.$toast(message)
+      }
+      this.followLoading = false
     }
   },
   created () {
@@ -167,6 +225,13 @@ export default {
   }
 
   }
+ }
+ // 取消关注按钮
+ .follow-btn{
+  height: 58px;
+  width: 171px;
+  margin-right: 39px;
+  font-size: 30px;
  }
  // 关注按钮
  .button-attention {
