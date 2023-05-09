@@ -20,24 +20,14 @@
           </div>
 
          </div>
-          <van-button
-          v-if="articleDetailList.is_followed"
-            class="follow-btn"
-            round
-            size="small"
-            @click="isFollow"
-            :loading="followLoading"
-          >已关注</van-button>
-         <van-button
-         v-else
-         round type="info"
-         size="small"
-         @click="isFollow"
-         :loading="followLoading"
-         class="button-attention">
-            <van-icon slot="icon" name="plus" class="plus-icon"></van-icon>
-            <span class="text">关注</span>
-          </van-button>
+         <!-- 关注按钮 -->
+         <FollowUser
+          class="follow-btn"
+          :isfollowed="articleDetailList.is_followed"
+          :userId="articleDetailList.aut_id"
+          @btnViews="articleDetailList.is_followed = $event"
+          ></FollowUser>
+          <!-- /关注按钮 -->
        </div>
        <div>
         <div
@@ -47,6 +37,56 @@
         ></div>
         <van-divider>正文结束</van-divider>
        </div>
+       <!-- 评论区域 -->
+       <CommentList
+       :source="articleDetailList.art_id"
+       @tranTotalAccount="countAmount = $event.total_count"
+       @reply-btn="onReplyShow"
+       class="comment"
+       :list="newCommont"
+       ></CommentList>
+       <!-- /评论区域 -->
+       <!-- 底部区域 -->
+    <div class="article-bottom">
+      <van-button
+        class="comment-btn"
+        type="default"
+        round
+        size="small"
+        @click="commontshow = true"
+      >写评论</van-button>
+      <van-icon
+        name="comment-o"
+        :badge="countAmount"
+        color="#777"
+        class="comment-icon"
+      />
+      <CollectArticle
+      class="btn-item"
+      v-model="articleDetailList.is_collected"
+      :artid="articleDetailList.art_id"
+      >
+      </CollectArticle>
+
+      <LikeArticle
+      class="btn-item"
+      v-model="articleDetailList.attitude"
+      :artid="articleDetailList.art_id"
+      ></LikeArticle>
+      <van-icon name="share" color="#777777"></van-icon>
+    </div>
+    <!-- /底部区域 -->
+    <!-- 评论弹出层 -->
+    <van-popup
+    v-model="commontshow"
+    position="bottom"
+     >
+    <CommentPost
+    :artId="articleDetailList.art_id"
+    @isReleaseCommont="getIsReleaseCommont"
+    ></CommentPost>
+    </van-popup>
+    <!-- /评论弹出层 -->
     </div>
     <!-- /标题下的内容 -->
     <!-- 文章内容 -->
@@ -69,31 +109,18 @@
         >点击重试</van-button>
       </div>
       <!-- /加载失败：其它未知错误（例如网络原因或服务端异常） -->
-      <!-- 底部区域 -->
-    <div class="article-bottom">
-      <van-button
-        class="comment-btn"
-        type="default"
-        round
-        size="small"
+      <!-- 评论回复 -->
+      <van-popup v-model="isReplyshow" position="bottom" :style="{ height: '90%' }" >
+      <CommontReply
+      class="scroll-wrap"
+      v-if="isReplyshow"
+      @close="isReplyshow = false"
+      @updateReplyCount="currentCommont.reply_count++"
+      :commont="currentCommont"
+      ></CommontReply>
 
-      >写评论</van-button>
-      <van-icon
-        name="comment-o"
-        :badge="123"
-        color="#777"
-      />
-      <van-icon
-        color="#777"
-        name="star-o"
-      />
-      <van-icon
-        color="#777"
-        name="good-job-o"
-      />
-      <van-icon name="share" color="#777777"></van-icon>
-    </div>
-    <!-- /底部区域 -->
+      </van-popup>
+      <!-- /评论回复 -->
     </div>
 
 </template>
@@ -101,9 +128,25 @@
 <script>
 import { ImagePreview } from 'vant' // 导入点击文章图片滑动模块
 import { getArticleDetail } from '@/API/article'
-import { cancelFollow, addFollow } from '@/API/user'
+import CollectArticle from '@/component/collectarticle/CollectArticle.vue'
+import FollowUser from '@/component/follow-user/FollowUser.vue'
+import LikeArticle from '@/component/likeArticle/LikeArticle.vue'
+import CommentList from '@/views/article/commentList/CommentList.vue'
+import CommentPost from '@/component/editCommont/EditCommont.vue'
+import CommontReply from '@/views/article/commontReply/CommontReply.vue'
+
 export default {
   name: 'MyArticleDetail',
+  components: {
+    FollowUser, CollectArticle, LikeArticle, CommentList, CommentPost, CommontReply
+
+  },
+  // 给所有的后代组件提供数据  需要inject来接收值
+  provide: function () {
+    return {
+      articleId: this.articleId
+    }
+  },
   props: {
     articleId: {
       type: [String, Number],
@@ -115,7 +158,13 @@ export default {
       articleDetailList: {},
       isloding: true, // 控制刷新状态
       errStatus: 0, // 控制失败状态
-      followLoading: false // 控制点击关注的 loading状态
+      countAmount: 0, // 评论数量
+      commontshow: false, // 控制评论弹出层
+      newCommont: [], // 存储最新评论数据
+      isReplyshow: false, // 点击回复弹窗
+      currentCommont: {}, // 点击回复的当前评论数据
+      ucommontshow: false // 点击用户评论的评论弹层
+
     }
   },
 
@@ -139,7 +188,6 @@ export default {
           this.getImagePreView()
         }, 0)
       } catch (err) {
-        console.log(err)
         if (err.response && err.response.status === 404) {
           this.errStatus = 404
         }
@@ -160,26 +208,17 @@ export default {
         }
       })
     },
-    async isFollow () {
-      this.followLoading = true
-      try {
-        if (this.articleDetailList.is_followed) {
-          // 如果是已关注，点击就是取消关注
-          await cancelFollow(this.articleDetailList.aut_id)
-        } else {
-          // 如果是未关注，点击添加关注
-          await addFollow(this.articleDetailList.aut_id)
-        }
-        this.articleDetailList.is_followed = !this.articleDetailList.is_followed
-      } catch (err) {
-        let message = '操作失败，请重试'
-        if (err.response && err.response.status === 400) {
-          message = '不能关注自己'
-        }
-        this.$toast(message)
-      }
-      this.followLoading = false
+    // 控制弹出层 接收发布的最新评论，并传递给子组件
+    getIsReleaseCommont (data) {
+      this.commontshow = false
+      this.newCommont.unshift(data.new_obj)
+      this.countAmount++
+    },
+    onReplyShow (e) {
+      this.currentCommont = e
+      this.isReplyshow = true
     }
+
   },
   created () {
     this.aricleDetail()
@@ -313,13 +352,24 @@ export default {
       line-height: 46px;
       color: #a7a7a7;
     }
-    .van-icon {
+    .btn-item {
+      border: unset;
+      padding: unset;
+      font-size: 22.0799px;
+
+    }
+    /deep/ .van-icon {
       font-size: 40px;
       .van-info {
         font-size: 16px;
         background-color: #e22829;
       }
     }
+
   }
+  .comment {
+      margin-bottom: 97.16px;
+    }
+
 }
 </style>
