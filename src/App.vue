@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <keep-alive exclude="MyMine,MySearch,SearchResult,UserInfo,SearchHistory,SearchSuggestion,MyArticleDetail">
+      <router-view></router-view>
+    </keep-alive>
+
   </div>
 </template>
 

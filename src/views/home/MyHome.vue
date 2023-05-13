@@ -102,6 +102,18 @@ export default {
   computed: {
     ...mapState(['user'])
   }
+  // activated () {
+  //   window.addEventListener('scroll', () => {
+  //     this.$route.meta.scrollT = document.documentElement.scrollTop
+  //     console.log(this.$route)
+  //   })
+  //   document.documentElement.scrollTop = this.$route.meta.scrollT
+  // },
+  // deactivated () {
+  //   window.removeEventListener('scroll', () => {
+  //     this.$route.meta.scrollT = document.documentElement.scrollTop
+  //   })
+  // }
 
 }
 </script>

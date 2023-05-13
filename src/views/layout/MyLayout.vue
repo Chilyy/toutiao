@@ -1,7 +1,10 @@
 <template>
   <div class="MyLayout-container">
     <!-- 子路由出口 -->
-    <router-view></router-view>
+    <keep-alive >
+      <router-view></router-view>
+    </keep-alive>
+
     <!-- /子路由出口 -->
     <!-- 底部tabbar -->
     <van-tabbar  class="style-container" route active-color="#ee0a24" placeholder>

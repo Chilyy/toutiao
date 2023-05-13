@@ -63,3 +63,26 @@ export const cancelFollow = target => {
     url: `/v1_0/user/followings/${target}`
   })
 }
+// 获取用户资料信息
+export const getUserInfo = () => {
+  return request({
+    method: 'GET',
+    url: '/v1_0/user/profile'
+  })
+}
+// 编辑用户资料信息
+export const editUserInfo = data => {
+  return request({
+    method: 'PATCH',
+    url: '/v1_0/user/profile',
+    data
+  })
+}
+// 更改用户的头像
+export const changeUserPhoto = data => {
+  return request({
+    method: 'PATCH',
+    url: '/v1_0/user/photo',
+    data
+  })
+}

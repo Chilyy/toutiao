@@ -1,6 +1,7 @@
 import axios from 'axios'
 import store from '@/store'
-
+import router from '@/router/index'
+import removeItem from '@/utils/storage'
 const request = axios.create({
   baseURL: 'http://toutiao.itheima.net/' // 接口基准路径
 })
@@ -19,6 +20,11 @@ request.interceptors.request.use(function (config) {
   // 注意:这里务必要返回 config 配置对象，否则请求就停在这
   return config
 }, function (error) {
+  if (error.response.status === 401) {
+    console.log(error)
+    removeItem('USER-KEY')
+    router.push('/login')
+  }
   // Do something with request error
   // 如果请求出错了 (还没有发出去) 会进入这里
   return Promise.reject(error)

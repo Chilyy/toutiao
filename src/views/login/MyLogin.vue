@@ -54,7 +54,7 @@ export default {
     return {
       // 手机输入框里的数据
       user: {
-        mobile: '19876781243',
+        mobile: '13911111111',
         code: '246810'
       },
       // 判断用户输入

@@ -73,7 +73,17 @@
       v-model="articleDetailList.attitude"
       :artid="articleDetailList.art_id"
       ></LikeArticle>
-      <van-icon name="share" color="#777777"></van-icon>
+      <van-icon
+      name="share"
+      color="#777777"
+      @click="isShowShare = true"
+      ></van-icon>
+      <van-share-sheet
+        v-model="isShowShare"
+        title="立即分享给好友"
+        :options="options"
+
+      />
     </div>
     <!-- /底部区域 -->
     <!-- 评论弹出层 -->
@@ -163,8 +173,22 @@ export default {
       newCommont: [], // 存储最新评论数据
       isReplyshow: false, // 点击回复弹窗
       currentCommont: {}, // 点击回复的当前评论数据
-      ucommontshow: false // 点击用户评论的评论弹层
-
+      ucommontshow: false, // 点击用户评论的评论弹层
+      isShowShare: false, // 点击展示分享
+      options: [
+        [
+          { name: '微信', icon: 'wechat' },
+          { name: '朋友圈', icon: 'wechat-moments' },
+          { name: '微博', icon: 'weibo' },
+          { name: 'QQ', icon: 'qq' }
+        ],
+        [
+          { name: '复制链接', icon: 'link' },
+          { name: '分享海报', icon: 'poster' },
+          { name: '二维码', icon: 'qrcode' },
+          { name: '小程序码', icon: 'weapp-qrcode' }
+        ]
+      ]
     }
   },
 

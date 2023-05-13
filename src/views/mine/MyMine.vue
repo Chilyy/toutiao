@@ -10,23 +10,24 @@
      <!--  /顶部头像、背景样式-----非登录状态 -->
 
      <!-- 顶部头像、背景样式-----登录状态 -->
-    <div class="login-header" v-if="$store.state.user">
-      <div class="base-info">
+    <div class="login-header"  v-if="$store.state.user">
+      <div class="base-info" @click="enterInfo">
         <div class="left">
           <van-image
             class="photo"
             round
             width="90px"
             height="90px"
-            :src="$store.state.user.mobile === '19876781243' ? require('@/assets/微信图片_20230423201325.jpg') : Uinfo.photo"
+            :src="$store.state.user.mobile === '19876781243' ? require('@/assets/微信图片_20230423201325.jpg') : this.$store.state.userPhoto"
             fit="cover"
 
           />
+
           <span class="img-title">{{$store.state.user.mobile === '19876781243' ? '财贸腿最短' : Uinfo.name}}</span>
           <van-tag   class="tag" v-if="$store.state.user.mobile === '19876781243'">财贸认证:黄金右脚</van-tag>
         </div>
         <div class="right">
-          <van-button squired type="info"><i slot="icon" class="toutiao toutiao-yuedu"></i>今日已阅读<br>5分钟</van-button>
+          <van-button squired type="info" ><i slot="icon" class="toutiao toutiao-yuedu" ></i>今日已阅读<br>5分钟</van-button>
         </div>
       </div>
       <div class="data-stats">
@@ -64,7 +65,7 @@
     <!-- /收藏、历史按钮-----非登录和登录状态 -->
 </van-grid >
   <van-cell title="消息通知" is-link class="cell"/>
-  <van-cell title="小智同学" is-link class="cell"/>
+  <van-cell title="小珠同学" is-link class="cell" to="/chat"/>
   <van-cell title="帮助与反馈" is-link class="cell"/>
   <!-- 点击退出按钮-----登录状态 -->
   <van-cell @click="djexit" v-if="$store.state.user" class="cell-exit" clickable><span slot="title" class="exit-title">退出登录</span></van-cell>
@@ -74,6 +75,7 @@
 
 <script>
 import { userInfo } from '@/API/user'
+import { removeItem } from '@/utils/storage'
 
 // import removeItem from '@/utils/storage'
 export default {
@@ -108,14 +110,20 @@ export default {
       try {
         const { data: res } = await userInfo()
         this.Uinfo = res.data
+        this.$store.commit('USER_PHOTO', this.Uinfo.photo)
       } catch (err) {
-
+        removeItem('USER-KEY')
+        this.$router.push('/login')
       }
+    },
+    // 点击顶部部分 跳转编辑资料页面
+    enterInfo () {
+      this.$router.push('/info')
     }
   },
-  created () {
+  activated () {
     // 如果用户没登录就不发请求
-    if (this.$store.state) {
+    if (this.$store.state.user) {
       this.getUserInfo()
     }
   }
